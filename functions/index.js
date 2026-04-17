@@ -412,6 +412,14 @@ export async function onRequest(context) {
   if (safeCustomFontUrl) fontLinksHtml += `<link rel="stylesheet" href="${safeCustomFontUrl}">`;
   // 字体域名预连接（减少 DNS + TLS 延迟）
   if (needsFontPreconnect) headInjections += `<link rel="preconnect" href="https://fonts.loli.net" crossorigin>`;
+  if (safeCustomFontUrl) {
+    try {
+      const customFontOrigin = new URL(safeCustomFontUrl).origin;
+      if (customFontOrigin !== 'https://fonts.loli.net') {
+        headInjections += `<link rel="preconnect" href="${escapeHTML(customFontOrigin)}" crossorigin>`;
+      }
+    } catch { /* sanitizeUrl 已校验，这里不会触达 */ }
+  }
   if (fontLinksHtml) headInjections += fontLinksHtml;
 
   // 卡片自定义字体 CSS
